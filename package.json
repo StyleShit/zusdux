@@ -1,12 +1,12 @@
 {
-	"name": "create-typescript-package",
-	"description": "A template project for creating TypeScript packages",
+	"name": "zusdux",
+	"description": "The forbidden love child of Redux and Zustand",
 	"version": "0.0.0",
 	"author": "StyleShit",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/StyleShit/create-typescript-package"
+		"url": "https://github.com/StyleShit/zusdux"
 	},
 	"type": "module",
 	"main": "dist/index.js",
