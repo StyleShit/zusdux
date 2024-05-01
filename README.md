@@ -19,7 +19,7 @@ First, you create a store with the `createStore` function. It takes an object wi
 
 -   `initialState` - It's... well... the _initial state_ of your store
 
--   `reducers` - An object containing the ["case reducers"](https://redux-toolkit.js.org/api/createSlice#reducers) of your store
+-   `reducers` - An object containing the "[case reducers](https://redux-toolkit.js.org/api/createSlice#reducers)" of your store
 
 ```ts
 // store.ts
