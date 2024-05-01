@@ -143,15 +143,11 @@ describe('Zusdux', () => {
 			<T = ExpectedState>(selector?: (s: ExpectedState) => T) => T
 		>();
 
-		expectTypeOf(actions.increment).toEqualTypeOf<() => void>();
-
-		expectTypeOf(actions.incrementBy).toEqualTypeOf<
-			(payload: number) => void
-		>();
-
-		expectTypeOf(actions.setName).toEqualTypeOf<
-			(payload: string) => void
-		>();
+		expectTypeOf(actions).toEqualTypeOf<{
+			increment: () => void;
+			incrementBy: (payload: number) => void;
+			setName: (payload: string) => void;
+		}>();
 	});
 });
 
