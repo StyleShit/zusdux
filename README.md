@@ -112,3 +112,5 @@ const count = useStore((state) => state.count);
 ```
 
 This way, your component will only re-render when the selected part of the store changes.
+
+As you might've noticed, we don't need a provider at all! 🥳
