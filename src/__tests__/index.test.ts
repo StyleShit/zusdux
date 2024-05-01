@@ -66,7 +66,7 @@ describe('Zusdux', () => {
 		const { actions, useStore } = createCounter();
 
 		// Act.
-		const { result } = renderHook(useStore);
+		const { result } = renderHook(() => useStore());
 
 		// Assert.
 		expect(result.current).toStrictEqual({
@@ -74,6 +74,7 @@ describe('Zusdux', () => {
 			count: 0,
 		});
 
+		// Act.
 		act(actions.increment);
 
 		// Assert.
@@ -83,23 +84,73 @@ describe('Zusdux', () => {
 		});
 	});
 
+	it('should subscribe to changes using a React hook with selector', () => {
+		// Arrange.
+		const { actions, useStore } = createCounter();
+
+		// Act.
+		const { result } = renderHook(() => useStore((s) => s.count));
+
+		// Assert.
+		expect(result.current).toBe(0);
+
+		// Act.
+		act(actions.increment);
+
+		// Assert.
+		expect(result.current).toBe(1);
+	});
+
+	it('should not re-render unnecessarily when using a React hook with selector', () => {
+		// Arrange.
+		const { actions, useStore } = createCounter();
+		let renders = 0;
+
+		// Act.
+		renderHook(() => {
+			renders++;
+
+			return useStore((s) => s.count);
+		});
+
+		act(actions.increment);
+
+		// Assert.
+		expect(renders).toBe(2);
+
+		// Act.
+		act(() => {
+			actions.setName('new-name');
+		});
+
+		// Assert.
+		expect(renders).toBe(2);
+	});
+
 	it('should have proper types', () => {
 		// Arrange.
 		const { actions, getState, useStore } = createCounter();
 
+		type ExpectedState = {
+			name: string;
+			count: number;
+		};
+
 		// Assert.
-		expectTypeOf(getState).toEqualTypeOf<
-			() => { name: string; count: number }
-		>();
+		expectTypeOf(getState).toEqualTypeOf<() => ExpectedState>();
 
 		expectTypeOf(useStore).toEqualTypeOf<
-			() => { name: string; count: number }
+			<T = ExpectedState>(selector?: (s: ExpectedState) => T) => T
 		>();
 
 		expectTypeOf(actions.increment).toEqualTypeOf<() => void>();
 
 		expectTypeOf(actions.incrementBy).toEqualTypeOf<
 			(payload: number) => void
+		>();
+
+		expectTypeOf(actions.setName).toEqualTypeOf<
+			(payload: string) => void
 		>();
 	});
 });
@@ -119,6 +170,11 @@ function createCounter() {
 			incrementBy: (state, by: number) => ({
 				...state,
 				count: state.count + by,
+			}),
+
+			setName: (state, newName: string) => ({
+				...state,
+				name: newName,
 			}),
 		},
 	});

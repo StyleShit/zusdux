@@ -19,7 +19,7 @@ export function createStore<
 	getState: () => S;
 	actions: Actionify<R>;
 	subscribe: (cb: () => void) => () => void;
-	useStore: () => S;
+	useStore: <T = S>(selector?: (state: S) => T) => T;
 } {
 	let state = structuredClone(initialState);
 	const subscribers = new Set<() => void>();
@@ -50,8 +50,10 @@ export function createStore<
 		});
 	};
 
-	const useStore = () => {
-		return useSyncExternalStore(subscribe, getState);
+	const useStore = <T = S>(
+		selector: (s: S) => T = (s) => s as unknown as T,
+	): T => {
+		return useSyncExternalStore(subscribe, () => selector(getState()));
 	};
 
 	return {
