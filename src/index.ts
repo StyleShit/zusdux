@@ -25,9 +25,9 @@ export function createStore<
 
 	const actions = Object.entries(reducer).reduce<
 		Record<string, (...args: unknown[]) => any>
-	>((acc, [key, reducer]) => {
+	>((acc, [key, fn]) => {
 		acc[key] = (...args: unknown[]) => {
-			state = reducer(state, ...args);
+			state = fn(state, ...args);
 
 			notify();
 		};
