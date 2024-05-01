@@ -157,7 +157,7 @@ function createCounter() {
 			name: 'counter',
 			count: 0,
 		},
-		reducer: {
+		reducers: {
 			increment: (state) => ({
 				...state,
 				count: state.count + 1,

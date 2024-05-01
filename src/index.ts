@@ -11,10 +11,10 @@ export function createStore<
 	R extends Record<string, (state: S, payload?: any) => S>,
 >({
 	initialState,
-	reducer,
+	reducers,
 }: {
 	initialState: S;
-	reducer: R;
+	reducers: R;
 }): {
 	getState: () => S;
 	actions: Actionify<R>;
@@ -26,11 +26,11 @@ export function createStore<
 
 	const getState = () => state;
 
-	const actions = Object.entries(reducer).reduce<
+	const actions = Object.entries(reducers).reduce<
 		Record<string, (...args: unknown[]) => any>
-	>((acc, [key, fn]) => {
+	>((acc, [key, reducer]) => {
 		acc[key] = (...args: unknown[]) => {
-			state = fn(state, ...args);
+			state = reducer(state, ...args);
 
 			notify();
 		};
