@@ -26,4 +26,10 @@ export default tseslint.config(
 			'**/__snapshots__/**',
 		],
 	},
+	{
+		rules: {
+			// We use `any` in the code for a good reason.
+			'@typescript-eslint/no-explicit-any': 'off',
+		},
+	},
 );
