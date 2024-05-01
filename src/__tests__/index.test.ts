@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { createStore } from '../index';
 
 describe('Zusdux', () => {
@@ -34,6 +34,29 @@ describe('Zusdux', () => {
 			name: 'counter',
 			count: 3,
 		});
+	});
+
+	it('should subscribe to changes', () => {
+		// Arrange.
+		const { actions, subscribe } = createCounter();
+
+		const onChange = vi.fn();
+
+		// Act.
+		const unsubscribe = subscribe(onChange);
+
+		actions.increment();
+
+		// Assert.
+		expect(onChange).toHaveBeenCalledOnce();
+
+		// Act.
+		unsubscribe();
+
+		actions.increment();
+
+		// Assert.
+		expect(onChange).toHaveBeenCalledOnce();
 	});
 
 	it('should have proper types', () => {

@@ -16,8 +16,10 @@ export function createStore<
 }): {
 	getState: () => S;
 	actions: Actionify<R>;
+	subscribe: (cb: () => void) => () => void;
 } {
 	let state = structuredClone(initialState);
+	const subscribers = new Set<() => void>();
 
 	const getState = () => state;
 
@@ -26,13 +28,28 @@ export function createStore<
 	>((acc, [key, reducer]) => {
 		acc[key] = (...args: unknown[]) => {
 			state = reducer(state, ...args);
+
+			notify();
 		};
 
 		return acc;
 	}, {}) as Actionify<R>;
 
+	const subscribe = (cb: () => void) => {
+		subscribers.add(cb);
+
+		return () => subscribers.delete(cb);
+	};
+
+	const notify = () => {
+		subscribers.forEach((cb) => {
+			cb();
+		});
+	};
+
 	return {
 		actions,
 		getState,
+		subscribe,
 	};
 }
