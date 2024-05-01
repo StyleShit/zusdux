@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react';
+
 type Actionify<R extends Record<string, (state: any, payload?: any) => any>> = {
 	[K in keyof R]: Parameters<R[K]>['length'] extends 2
 		? (payload: Parameters<R[K]>[1]) => void
@@ -17,6 +19,7 @@ export function createStore<
 	getState: () => S;
 	actions: Actionify<R>;
 	subscribe: (cb: () => void) => () => void;
+	useStore: () => S;
 } {
 	let state = structuredClone(initialState);
 	const subscribers = new Set<() => void>();
@@ -47,9 +50,14 @@ export function createStore<
 		});
 	};
 
+	const useStore = () => {
+		return useSyncExternalStore(subscribe, getState);
+	};
+
 	return {
 		actions,
 		getState,
 		subscribe,
+		useStore,
 	};
 }

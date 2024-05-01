@@ -1,5 +1,7 @@
-import { describe, expect, expectTypeOf, it, vi } from 'vitest';
+import { act } from 'react';
 import { createStore } from '../index';
+import { renderHook } from '@testing-library/react';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 
 describe('Zusdux', () => {
 	it('should set a default state on creation', () => {
@@ -36,7 +38,7 @@ describe('Zusdux', () => {
 		});
 	});
 
-	it('should subscribe to changes', () => {
+	it('should subscribe to changes using a subscribe function', () => {
 		// Arrange.
 		const { actions, subscribe } = createCounter();
 
@@ -59,12 +61,38 @@ describe('Zusdux', () => {
 		expect(onChange).toHaveBeenCalledOnce();
 	});
 
+	it('should subscribe to changes using a React hook', () => {
+		// Arrange.
+		const { actions, useStore } = createCounter();
+
+		// Act.
+		const { result } = renderHook(useStore);
+
+		// Assert.
+		expect(result.current).toStrictEqual({
+			name: 'counter',
+			count: 0,
+		});
+
+		act(actions.increment);
+
+		// Assert.
+		expect(result.current).toStrictEqual({
+			name: 'counter',
+			count: 1,
+		});
+	});
+
 	it('should have proper types', () => {
 		// Arrange.
-		const { actions, getState } = createCounter();
+		const { actions, getState, useStore } = createCounter();
 
 		// Assert.
 		expectTypeOf(getState).toEqualTypeOf<
+			() => { name: string; count: number }
+		>();
+
+		expectTypeOf(useStore).toEqualTypeOf<
 			() => { name: string; count: number }
 		>();
 
