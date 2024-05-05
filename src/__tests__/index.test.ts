@@ -15,6 +15,22 @@ describe('Zusdux', () => {
 		});
 	});
 
+	it('should not keep the same reference to the original state', () => {
+		// Arrange.
+		const initialState = {
+			name: 'counter',
+			count: 0,
+		};
+
+		const { getState } = createStore({
+			initialState,
+			reducers: {},
+		});
+
+		// Assert.
+		expect(getState()).not.toBe(initialState);
+	});
+
 	it('should change the state using actions', () => {
 		// Arrange.
 		const { actions, getState } = createCounter();
