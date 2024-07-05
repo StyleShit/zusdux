@@ -31,6 +31,23 @@ describe('Zusdux', () => {
 		expect(getState()).not.toBe(initialState);
 	});
 
+	it('should change the state using the setState function', () => {
+		// Arrange.
+		const { setState, getState } = createCounter();
+
+		// Act.
+		setState((prev) => ({
+			...prev,
+			count: 5,
+		}));
+
+		// Assert.
+		expect(getState()).toStrictEqual({
+			name: 'counter',
+			count: 5,
+		});
+	});
+
 	it('should change the state using actions', () => {
 		// Arrange.
 		const { actions, getState } = createCounter();
@@ -194,7 +211,7 @@ describe('Zusdux', () => {
 
 	it('should have proper types', () => {
 		// Arrange.
-		const { actions, getState, useStore } = createCounter();
+		const { actions, getState, setState, useStore } = createCounter();
 
 		type ExpectedState = {
 			name: string;
@@ -203,6 +220,10 @@ describe('Zusdux', () => {
 
 		// Assert.
 		expectTypeOf(getState).toEqualTypeOf<() => ExpectedState>();
+
+		expectTypeOf(setState).toEqualTypeOf<
+			(setter: (prevState: ExpectedState) => ExpectedState) => void
+		>();
 
 		expectTypeOf(useStore).toEqualTypeOf<
 			<T = ExpectedState>(selector?: (s: ExpectedState) => T) => T

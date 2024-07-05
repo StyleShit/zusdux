@@ -12,7 +12,7 @@ It has a [Redux Toolkit](https://redux-toolkit.js.org/)-like API, but with Zusta
 The API is pretty similar to what you'd find in Redux Toolkit's [createSlice](https://redux-toolkit.js.org/api/createSlice) function, with a leaner signature, and without
 the need for [providers](https://react-redux.js.org/api/provider) or messing up with [async thunks](https://redux-toolkit.js.org/api/createAsyncThunk) - similar to Zustand.
 
-It has a single function, called `createStore`, which returns an object with `getState`, `subscribe`, `useStore`, and `actions` properties.
+It has a single function, called `createStore`, which returns an object with `getState`, `setState`, `subscribe`, `useStore`, and `actions` properties.
 
 ## Usage
 
@@ -27,50 +27,52 @@ First, you create a store with the `createStore` function. It takes an object wi
 // store.ts
 import { createStore } from 'zusdux';
 
-export const { actions, getState, subscribe, useStore } = createStore({
-	initialState: {
-		name: 'counter',
-		count: 0,
-		isLoading: false,
+export const { actions, getState, setState, subscribe, useStore } = createStore(
+	{
+		initialState: {
+			name: 'counter',
+			count: 0,
+			isLoading: false,
+		},
+		actions: {
+			increment: (set) => {
+				set((prev) => ({
+					...prev,
+					count: prev.count + 1,
+				}));
+			},
+
+			incrementBy: (set, by: number) => {
+				set((prev) => ({
+					...prev,
+					count: prev.count + by,
+				}));
+			},
+
+			incrementAsync: async (set) => {
+				set((prev) => ({
+					...prev,
+					isLoading: true,
+				}));
+
+				await new Promise((resolve) => setTimeout(resolve, 100));
+
+				set((prev) => ({
+					...prev,
+					count: prev.count + 1,
+					isLoading: false,
+				}));
+			},
+
+			setName: (set, firstName: string, lastName: string) => {
+				set((prev) => ({
+					...prev,
+					name: firstName + ' ' + lastName,
+				}));
+			},
+		},
 	},
-	actions: {
-		increment: (set) => {
-			set((prev) => ({
-				...prev,
-				count: prev.count + 1,
-			}));
-		},
-
-		incrementBy: (set, by: number) => {
-			set((prev) => ({
-				...prev,
-				count: prev.count + by,
-			}));
-		},
-
-		incrementAsync: async (set) => {
-			set((prev) => ({
-				...prev,
-				isLoading: true,
-			}));
-
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			set((prev) => ({
-				...prev,
-				count: prev.count + 1,
-				isLoading: false,
-			}));
-		},
-
-		setName: (set, firstName: string, lastName: string) => {
-			set((prev) => ({
-				...prev,
-				name: firstName + ' ' + lastName,
-			}));
-		},
-	},
-});
+);
 ```
 
 Each "store action" is then converted to a "user action" under the store object, which will update the store's state when called:
@@ -82,14 +84,17 @@ await actions.incrementAsync();
 actions.setName('new', 'name');
 ```
 
-In addition, you can access the current store's state with the `getState` function:
+In addition, you can access the current store's state with the `getState` function, and update it with the `setState` function:
 
 ```ts
 const currentState = getState(); // { name: 'counter', count: 0 }
 
-actions.increment();
+setState((prev) => ({
+	...prev,
+	count: 5,
+}));
 
-const updatedState = getState(); // { name: 'counter', count: 1 }
+const updatedState = getState(); // { name: 'counter', count: 5 }
 ```
 
 Similar to Redux, you can also subscribe to the store's state changes:

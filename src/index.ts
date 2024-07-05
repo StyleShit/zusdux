@@ -12,6 +12,7 @@ export function createStore<
 	actions: A;
 }): {
 	getState: () => S;
+	setState: SetState<S>;
 	actions: ParseActions<A>;
 	subscribe: (cb: () => void) => () => void;
 	useStore: <T = S>(selector?: (state: S) => T) => T;
@@ -58,6 +59,7 @@ export function createStore<
 	return {
 		actions,
 		getState,
+		setState,
 		subscribe,
 		useStore,
 	};
