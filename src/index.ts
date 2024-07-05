@@ -2,27 +2,30 @@ import { useSyncExternalStore } from 'react';
 import type { ParseActions, SetState } from './types';
 
 export function createStore<
-	S extends object,
-	A extends Record<string, (setState: SetState<S>, ...args: any[]) => void>,
+	TState extends object,
+	TActions extends Record<
+		string,
+		(setState: SetState<TState>, ...args: any[]) => void
+	>,
 >({
 	initialState,
 	actions: rawActions,
 }: {
-	initialState: S;
-	actions: A;
+	initialState: TState;
+	actions: TActions;
 }): {
-	getState: () => S;
-	setState: SetState<S>;
-	actions: ParseActions<A>;
+	getState: () => TState;
+	setState: SetState<TState>;
+	actions: ParseActions<TActions>;
 	subscribe: (cb: () => void) => () => void;
-	useStore: <T = S>(selector?: (state: S) => T) => T;
+	useStore: <R = TState>(selector?: (state: TState) => R) => R;
 } {
 	let state = structuredClone(initialState);
 	const subscribers = new Set<() => void>();
 
 	const getState = () => state;
 
-	const setState: SetState<S> = (setterOrState) => {
+	const setState: SetState<TState> = (setterOrState) => {
 		state =
 			typeof setterOrState === 'function'
 				? setterOrState(state)
@@ -39,7 +42,7 @@ export function createStore<
 		};
 
 		return acc;
-	}, {}) as ParseActions<A>;
+	}, {}) as ParseActions<TActions>;
 
 	const subscribe = (cb: () => void) => {
 		subscribers.add(cb);
@@ -53,9 +56,9 @@ export function createStore<
 		});
 	};
 
-	const useStore = <T = S>(
-		selector: (s: S) => T = (s) => s as unknown as T,
-	): T => {
+	const useStore = <TReturn = TState>(
+		selector: (s: TState) => TReturn = (s) => s as unknown as TReturn,
+	): TReturn => {
 		return useSyncExternalStore(subscribe, () => selector(getState()));
 	};
 

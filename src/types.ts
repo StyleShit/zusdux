@@ -1,10 +1,10 @@
 export type ParseActions<
-	A extends Record<string, (setState: any, ...args: any[]) => any>,
+	TActions extends Record<string, (...args: any[]) => any>,
 > = {
-	[K in keyof A]: SliceFirstParam<A[K]>;
+	[Key in keyof TActions]: SliceFirstParam<TActions[Key]>;
 };
 
-type SliceFirstParam<T> = T extends (first: any, ...args: infer A) => infer R
+type SliceFirstParam<F> = F extends (first: any, ...args: infer A) => infer R
 	? (...args: A) => R
 	: never;
 
