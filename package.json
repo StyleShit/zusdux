@@ -1,7 +1,7 @@
 {
 	"name": "zusdux",
 	"description": "The forbidden love child of Redux and Zustand",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": "StyleShit",
 	"license": "MIT",
 	"repository": {
