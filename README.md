@@ -52,10 +52,7 @@ export const { actions, getState, setState, subscribe, useStore } = createStore(
 			},
 
 			incrementAsync: async (set) => {
-				set((prev) => ({
-					...prev,
-					isLoading: true,
-				}));
+				set({ isLoading: true });
 
 				await new Promise((resolve) => setTimeout(resolve, 100));
 
