@@ -22,8 +22,11 @@ export function createStore<
 
 	const getState = () => state;
 
-	const setState: SetState<S> = (setter) => {
-		state = setter(state);
+	const setState: SetState<S> = (setterOrState) => {
+		state =
+			typeof setterOrState === 'function'
+				? setterOrState(state)
+				: { ...state, ...setterOrState };
 
 		notify();
 	};

@@ -9,4 +9,6 @@ export type ParseActions<
 		: never;
 };
 
-export type SetState<S> = (setter: (prevState: S) => S) => void;
+export type SetState<S> = (
+	setterOrState: ((prevState: S) => S) | Partial<S>,
+) => void;

@@ -21,7 +21,9 @@ First, you create a store with the `createStore` function. It takes an object wi
 -   `initialState` - It's... well... the _initial state_ of your store
 
 -   `actions` - An object containing a list of actions that can be performed on the state. The actions can be either synchronous or asynchronous, they can take any
-    number of arguments, while the first one is a `set` function that allows you to update the store's state
+    number of arguments, while the first one is a `set` function that allows you to update the store's stat. The `set` function can accept either a new state object
+    that will be shallowly merged with the current state, or a function that receives the current state and returns the new state.
+    (See [Zustand](https://docs.pmnd.rs/zustand/guides/updating-state)'s documentation for more info)
 
 ```ts
 // store.ts
@@ -65,10 +67,7 @@ export const { actions, getState, setState, subscribe, useStore } = createStore(
 			},
 
 			setName: (set, firstName: string, lastName: string) => {
-				set((prev) => ({
-					...prev,
-					name: firstName + ' ' + lastName,
-				}));
+				set({ name: firstName + ' ' + lastName });
 			},
 		},
 	},

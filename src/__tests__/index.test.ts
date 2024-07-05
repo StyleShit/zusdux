@@ -46,6 +46,15 @@ describe('Zusdux', () => {
 			name: 'counter',
 			count: 5,
 		});
+
+		// Act.
+		setState({ count: 10 });
+
+		// Assert.
+		expect(getState()).toStrictEqual({
+			name: 'counter',
+			count: 10,
+		});
 	});
 
 	it('should change the state using actions', () => {
@@ -222,7 +231,11 @@ describe('Zusdux', () => {
 		expectTypeOf(getState).toEqualTypeOf<() => ExpectedState>();
 
 		expectTypeOf(setState).toEqualTypeOf<
-			(setter: (prevState: ExpectedState) => ExpectedState) => void
+			(
+				setterOrState:
+					| ((prevState: ExpectedState) => ExpectedState)
+					| Partial<ExpectedState>,
+			) => void
 		>();
 
 		expectTypeOf(useStore).toEqualTypeOf<
@@ -259,10 +272,7 @@ function createCounter() {
 			},
 
 			setName: (set, firstName: string, lastName: string) => {
-				set((prev) => ({
-					...prev,
-					name: firstName + ' ' + lastName,
-				}));
+				set({ name: firstName + ' ' + lastName });
 			},
 		},
 	});
