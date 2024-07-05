@@ -1,6 +1,6 @@
 import { act } from 'react';
 import { createStore } from '../index';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 
 describe('Zusdux', () => {
@@ -24,7 +24,7 @@ describe('Zusdux', () => {
 
 		const { getState } = createStore({
 			initialState,
-			reducers: {},
+			actions: {},
 		});
 
 		// Assert.
@@ -51,6 +51,55 @@ describe('Zusdux', () => {
 		expect(getState()).toStrictEqual({
 			name: 'counter',
 			count: 3,
+		});
+
+		// Act.
+		actions.setName('John', 'Doe');
+
+		// Assert.
+		expect(getState()).toStrictEqual({
+			name: 'John Doe',
+			count: 3,
+		});
+	});
+
+	it('should support async actions', async () => {
+		// Arrange.
+		const { actions, getState } = createStore({
+			initialState: {
+				users: [] as string[],
+				isLoading: false,
+			},
+			actions: {
+				async fetchUsers(set) {
+					set((prev) => ({
+						...prev,
+						isLoading: true,
+					}));
+
+					await new Promise((resolve) => setTimeout(resolve, 100));
+
+					set((prev) => ({
+						...prev,
+						users: ['User 1', 'User 2'],
+						isLoading: false,
+					}));
+				},
+			},
+		});
+
+		// Act.
+		void actions.fetchUsers();
+
+		// Assert.
+		expect(getState()).toStrictEqual({
+			users: [],
+			isLoading: true,
+		});
+
+		// Assert.
+		await waitFor(() => {
+			expect(getState().users).toStrictEqual(['User 1', 'User 2']);
 		});
 	});
 
@@ -136,7 +185,7 @@ describe('Zusdux', () => {
 
 		// Act.
 		act(() => {
-			actions.setName('new-name');
+			actions.setName('John', 'Doe');
 		});
 
 		// Assert.
@@ -161,8 +210,8 @@ describe('Zusdux', () => {
 
 		expectTypeOf(actions).toEqualTypeOf<{
 			increment: () => void;
-			incrementBy: (payload: number) => void;
-			setName: (payload: string) => void;
+			incrementBy: (by: number) => void;
+			setName: (firstName: string, lastName: string) => void;
 		}>();
 	});
 });
@@ -173,21 +222,27 @@ function createCounter() {
 			name: 'counter',
 			count: 0,
 		},
-		reducers: {
-			increment: (state) => ({
-				...state,
-				count: state.count + 1,
-			}),
+		actions: {
+			increment: (set) => {
+				set((prev) => ({
+					...prev,
+					count: prev.count + 1,
+				}));
+			},
 
-			incrementBy: (state, by: number) => ({
-				...state,
-				count: state.count + by,
-			}),
+			incrementBy: (set, by: number) => {
+				set((prev) => ({
+					...prev,
+					count: prev.count + by,
+				}));
+			},
 
-			setName: (state, newName: string) => ({
-				...state,
-				name: newName,
-			}),
+			setName: (set, firstName: string, lastName: string) => {
+				set((prev) => ({
+					...prev,
+					name: firstName + ' ' + lastName,
+				}));
+			},
 		},
 	});
 }

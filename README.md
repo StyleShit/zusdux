@@ -9,17 +9,19 @@ It has a [Redux Toolkit](https://redux-toolkit.js.org/)-like API, but with Zusta
 
 ## API
 
-The API is pretty similar to what you'd find in Redux Toolkit's [createSlice](https://redux-toolkit.js.org/api/createSlice) function, with a leaner signature, and without the need for providers - similar to Zustand.
+The API is pretty similar to what you'd find in Redux Toolkit's [createSlice](https://redux-toolkit.js.org/api/createSlice) function, with a leaner signature, and without
+the need for [providers](https://react-redux.js.org/api/provider) or messing up with [async thunks](https://redux-toolkit.js.org/api/createAsyncThunk) - similar to Zustand.
 
 It has a single function, called `createStore`, which returns an object with `getState`, `subscribe`, `useStore`, and `actions` properties.
 
 ## Usage
 
-First, you create a store with the `createStore` function. It takes an object with `initialState` and `reducers` properties.
+First, you create a store with the `createStore` function. It takes an object with `initialState` and `actions` properties:
 
 -   `initialState` - It's... well... the _initial state_ of your store
 
--   `reducers` - An object containing the "[case reducers](https://redux-toolkit.js.org/api/createSlice#reducers)" of your store
+-   `actions` - An object containing a list of actions that can be performed on the state. The actions can be either synchronous or asynchronous, they can take any
+    number of arguments, while the first one is a `set` function that allows you to update the store's state
 
 ```ts
 // store.ts
@@ -29,32 +31,55 @@ export const { actions, getState, subscribe, useStore } = createStore({
 	initialState: {
 		name: 'counter',
 		count: 0,
+		isLoading: false,
 	},
-	reducers: {
-		increment: (state) => ({
-			...state,
-			count: state.count + 1,
-		}),
+	actions: {
+		increment: (set) => {
+			set((prev) => ({
+				...prev,
+				count: prev.count + 1,
+			}));
+		},
 
-		incrementBy: (state, by: number) => ({
-			...state,
-			count: state.count + by,
-		}),
+		incrementBy: (set, by: number) => {
+			set((prev) => ({
+				...prev,
+				count: prev.count + by,
+			}));
+		},
 
-		setName: (state, newName: string) => ({
-			...state,
-			name: newName,
-		}),
+		incrementAsync: async (set) => {
+			set((prev) => ({
+				...prev,
+				isLoading: true,
+			}));
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			set((prev) => ({
+				...prev,
+				count: prev.count + 1,
+				isLoading: false,
+			}));
+		},
+
+		setName: (set, firstName: string, lastName: string) => {
+			set((prev) => ({
+				...prev,
+				name: firstName + ' ' + lastName,
+			}));
+		},
 	},
 });
 ```
 
-Each "case reducer" is then converted to an action under the store object, which will update the store's state when called:
+Each "store action" is then converted to a "user action" under the store object, which will update the store's state when called:
 
 ```ts
 actions.increment();
 actions.incrementBy(5);
-actions.setName('new name');
+await actions.incrementAsync();
+actions.setName('new', 'name');
 ```
 
 In addition, you can access the current store's state with the `getState` function:
@@ -84,11 +109,12 @@ And similar to Zustand, you can use the store within your React components:
 import { actions, useStore } from './store';
 
 export const Counter = () => {
-	const { name, count } = useStore();
+	const { name, count, isLoading } = useStore();
 
 	return (
 		<div>
 			<h1>{name}</h1>
+			<p>{isLoading ? 'Loading...' : 'Not loading'}</p>
 			<p>Count: {count}</p>
 
 			<button onClick={actions.increment}>Increment</button>
@@ -97,7 +123,9 @@ export const Counter = () => {
 				Increment by 5
 			</button>
 
-			<button onClick={() => actions.setName('new name')}>
+			<button onClick={actions.incrementAsync}>Increment async</button>
+
+			<button onClick={() => actions.setName('new', 'name')}>
 				Set name
 			</button>
 		</div>

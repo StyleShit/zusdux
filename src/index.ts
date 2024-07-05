@@ -1,23 +1,18 @@
 import { useSyncExternalStore } from 'react';
-
-type Actionify<R extends Record<string, (state: any, payload?: any) => any>> = {
-	[K in keyof R]: Parameters<R[K]>['length'] extends 2
-		? (payload: Parameters<R[K]>[1]) => void
-		: () => void;
-};
+import type { ParseActions, SetState } from './types';
 
 export function createStore<
 	S extends object,
-	R extends Record<string, (state: S, payload?: any) => S>,
+	A extends Record<string, (setState: SetState<S>, ...args: any[]) => void>,
 >({
 	initialState,
-	reducers,
+	actions: rawActions,
 }: {
 	initialState: S;
-	reducers: R;
+	actions: A;
 }): {
 	getState: () => S;
-	actions: Actionify<R>;
+	actions: ParseActions<A>;
 	subscribe: (cb: () => void) => () => void;
 	useStore: <T = S>(selector?: (state: S) => T) => T;
 } {
@@ -26,17 +21,21 @@ export function createStore<
 
 	const getState = () => state;
 
-	const actions = Object.entries(reducers).reduce<
-		Record<string, (...args: unknown[]) => any>
-	>((acc, [key, reducer]) => {
-		acc[key] = (...args: unknown[]) => {
-			state = reducer(state, ...args);
+	const setState: SetState<S> = (setter) => {
+		state = setter(state);
 
-			notify();
+		notify();
+	};
+
+	const actions = Object.entries(rawActions).reduce<
+		Record<string, (...args: unknown[]) => any>
+	>((acc, [key, action]) => {
+		acc[key] = (...args: unknown[]) => {
+			action(setState, ...args);
 		};
 
 		return acc;
-	}, {}) as Actionify<R>;
+	}, {}) as ParseActions<A>;
 
 	const subscribe = (cb: () => void) => {
 		subscribers.add(cb);
