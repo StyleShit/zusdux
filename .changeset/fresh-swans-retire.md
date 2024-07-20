@@ -1,5 +1,0 @@
----
-"zusdux": patch
----
-
-Update documentation

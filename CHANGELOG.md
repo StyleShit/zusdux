@@ -1,5 +1,11 @@
 # zusdux
 
+## 0.1.2
+
+### Patch Changes
+
+- 25c6697: Update documentation
+
 ## 0.1.1
 
 ### Patch Changes
