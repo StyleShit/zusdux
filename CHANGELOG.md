@@ -1,5 +1,11 @@
 # zusdux
 
+## 0.1.3
+
+### Patch Changes
+
+- 7cfd120: Publish only necessary files to NPM
+
 ## 0.1.2
 
 ### Patch Changes
