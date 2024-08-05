@@ -20,6 +20,13 @@
 		},
 		"./package.json": "./package.json"
 	},
+	"files": [
+		"README.md",
+		"CHANGELOG.md",
+		"/dist",
+		"/src",
+		"!**/__tests__"
+	],
 	"scripts": {
 		"test": "vitest",
 		"test:coverage": "vitest run --coverage",
