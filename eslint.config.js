@@ -27,6 +27,8 @@ export default tseslint.config(
 	},
 	{
 		rules: {
+			'no-console': 'error',
+
 			// We use `any` in the code for a good reason.
 			'@typescript-eslint/no-explicit-any': 'off',
 		},
